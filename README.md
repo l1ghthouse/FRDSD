@@ -25,3 +25,4 @@ Anyone a pointer where to look to solve this problem?
 
 Asked:
 - https://stackoverflow.com/questions/63687731/swiftui-and-dynamic-nssortdescriptors-in-fetchrequest
+- https://developer.apple.com/forums/thread/659042
