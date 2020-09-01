@@ -1,6 +1,9 @@
 # FRDSD
 FetchRequest Dynamic SortDescriptor
 
+SOLVED :)
+
+
 
 I have a list with items that contain a title and a date. User can set what to sort on (title or date).
 
