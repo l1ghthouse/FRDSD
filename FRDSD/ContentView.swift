@@ -4,10 +4,9 @@ import CoreData
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-    @FetchRequest(sortDescriptors: [sortDescriptor], animation: .default) private var items: FetchedResults<Test>
-
+    @AppStorage("firstLaunch") var firstLaunch: Bool = true
+    @State var sortDescriptor: NSSortDescriptor = NSSortDescriptor(keyPath: \Test.title, ascending: true)
     @State private var sortType: Int = 0
-    @State private var sortDescriptor: NSSortDescriptor = NSSortDescriptor(keyPath: \Test.title, ascending: true)
 
     var body: some View {
         Picker(selection: $sortType, label: Text("Sort")) {
@@ -25,19 +24,10 @@ struct ContentView: View {
             }
         }
 
-        List {
-            ForEach(items) { item in
-                let dateString = itemFormatter.string(from: item.date!)
-                HStack {
-                    Text(item.title!)
-                    Spacer()
-                    Text(dateString)
-                }
-            }
-        }
+        ListView(sortDescripter: sortDescriptor)
 
         .onAppear(perform: {
-            if items.isEmpty {
+            if firstLaunch == true {
                 let newEntry1 = Test(context: self.viewContext)
                 newEntry1.title = "Apple"
                 newEntry1.date = Date(timeIntervalSince1970: 197200800)
@@ -57,8 +47,34 @@ struct ContentView: View {
                 if self.viewContext.hasChanges {
                     try? self.viewContext.save()
                 }
+
+                firstLaunch = false
             }
         })
+    }
+}
+
+struct ListView: View {
+    @FetchRequest var items: FetchedResults<Test>
+    @Environment(\.managedObjectContext) var viewContext
+
+    init(sortDescripter: NSSortDescriptor) {
+        let request: NSFetchRequest<Test> = Test.fetchRequest()
+        request.sortDescriptors = [sortDescripter]
+        _items = FetchRequest<Test>(fetchRequest: request)
+    }
+
+    var body: some View {
+        List {
+            ForEach(items) { item in
+                let dateString = itemFormatter.string(from: item.date!)
+                HStack {
+                    Text(item.title!)
+                    Spacer()
+                    Text(dateString)
+                }
+            }
+        }
     }
 }
 
