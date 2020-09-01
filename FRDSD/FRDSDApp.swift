@@ -1,10 +1,3 @@
-//
-//  FRDSDApp.swift
-//  FRDSD
-//
-//  Created by Peter Cammeraat on 01/09/2020.
-//
-
 import SwiftUI
 
 @main

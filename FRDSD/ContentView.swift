@@ -1,80 +1,70 @@
-//
-//  ContentView.swift
-//  FRDSD
-//
-//  Created by Peter Cammeraat on 01/09/2020.
-//
-
 import SwiftUI
 import CoreData
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
+    @FetchRequest(sortDescriptors: [sortDescriptor], animation: .default) private var items: FetchedResults<Test>
+
+    @State private var sortType: Int = 0
+    @State private var sortDescriptor: NSSortDescriptor = NSSortDescriptor(keyPath: \Test.title, ascending: true)
 
     var body: some View {
+        Picker(selection: $sortType, label: Text("Sort")) {
+            Text("Title").tag(0)
+            Text("Date").tag(1)
+        }
+        .pickerStyle(SegmentedPickerStyle())
+        .onChange(of: sortType) { value in
+            sortType = value
+
+            if sortType == 0 {
+                sortDescriptor = NSSortDescriptor(keyPath: \Test.title, ascending: true)
+            } else {
+                sortDescriptor = NSSortDescriptor(keyPath: \Test.date, ascending: true)
+            }
+        }
+
         List {
             ForEach(items) { item in
-                Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-            }
-            .onDelete(perform: deleteItems)
-        }
-        .toolbar {
-            #if os(iOS)
-            EditButton()
-            #endif
-
-            Button(action: addItem) {
-                Label("Add Item", systemImage: "plus")
+                let dateString = itemFormatter.string(from: item.date!)
+                HStack {
+                    Text(item.title!)
+                    Spacer()
+                    Text(dateString)
+                }
             }
         }
-    }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+        .onAppear(perform: {
+            if items.isEmpty {
+                let newEntry1 = Test(context: self.viewContext)
+                newEntry1.title = "Apple"
+                newEntry1.date = Date(timeIntervalSince1970: 197200800)
 
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                let newEntry2 = Test(context: self.viewContext)
+                newEntry2.title = "Microsoft"
+                newEntry2.date = Date(timeIntervalSince1970: 168429600)
+
+                let newEntry3 = Test(context: self.viewContext)
+                newEntry3.title = "Google"
+                newEntry3.date = Date(timeIntervalSince1970: 904903200)
+
+                let newEntry4 = Test(context: self.viewContext)
+                newEntry4.title = "Amazon"
+                newEntry4.date = Date(timeIntervalSince1970: 773402400)
+
+                if self.viewContext.hasChanges {
+                    try? self.viewContext.save()
+                }
             }
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+        })
     }
 }
 
 private let itemFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateStyle = .short
-    formatter.timeStyle = .medium
+    formatter.timeStyle = .none
     return formatter
 }()
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-    }
-}
