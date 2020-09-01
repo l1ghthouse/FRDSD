@@ -20,3 +20,8 @@ the error "Cannot use instance member 'sortDescriptor' within property initializ
 I also tried to store the NSSortDescriptor in a UserDefault and create an init that creates it's own FetchRequest.. still no dynamic sorting...
 
 Anyone a pointer where to look to solve this problem?
+
+
+
+Asked:
+- https://stackoverflow.com/questions/63687731/swiftui-and-dynamic-nssortdescriptors-in-fetchrequest
